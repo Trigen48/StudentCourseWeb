@@ -10,22 +10,24 @@ import za.co.tumelon.student_course_api.Model.CourseModel;
 import za.co.tumelon.student_course_api.Model.ResponseModel;
 
 @RestController
+@RequestMapping("/course")
+@CrossOrigin(origins = "http://localhost")
 public class CourseController {
 
     @Autowired
     private CourseRepository courseRepository;
 
-    @GetMapping("/course")
+    @GetMapping("/")
     public Iterable<CourseModel> getCourse() {
         return courseRepository.findAll();
     }
 
-    @GetMapping("/course/{id}")
+    @GetMapping("/{id}")
     public Optional<CourseModel> getCourse(@PathVariable String id) {
         return courseRepository.findById(id);
     }
 
-    @PostMapping("/course")
+    @PostMapping("/")
     public ResponseModel addCourse(@RequestBody CourseModel course) {
         Optional<CourseModel> _course = courseRepository.findById(course.getCourseCode());
         if (_course.isPresent()) {
@@ -41,7 +43,7 @@ public class CourseController {
         return new ResponseModel(1, "Course Added");
     }
 
-    @PutMapping("/course/{id}")
+    @PutMapping("/{id}")
     public ResponseModel updateCourse(@RequestBody CourseModel course, @PathVariable String id) {
         Optional<CourseModel> _course = courseRepository.findById(id);
         if (!_course.isPresent()) {
@@ -57,7 +59,7 @@ public class CourseController {
         return new ResponseModel(1, "Course Updated");
     }
 
-    @DeleteMapping("/course/{id}")
+    @DeleteMapping("/{id}")
     public ResponseModel deleteCourse(@PathVariable String id) {
         Optional<CourseModel> _course = courseRepository.findById(id);
         if (!_course.isPresent()) {

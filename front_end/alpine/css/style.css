@@ -1,0 +1,27 @@
+.menu-item {
+    display: inline-block;
+    padding: 15px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    ;
+}
+
+.menu-item:hover {
+    background-color: rgb(13, 59, 86);
+    Color: #FFF;
+    cursor: pointer;
+}
+
+.view-control {
+    width: 100%;
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5%;
+    border: 1px solid rgb(186, 179, 179);
+
+}
+
+td {
+    vertical-align: middle !important;
+}

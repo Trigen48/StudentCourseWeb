@@ -14,6 +14,7 @@ import za.co.tumelon.student_course_api.Model.StudentModel;
 
 @RestController
 @RequestMapping("/student")
+@CrossOrigin(origins = "http://localhost")
 public class StudentController {
 
     @Autowired

@@ -15,28 +15,282 @@
     <title>Student Course Management</title>
     <link rel="stylesheet" href="./css/w3.css" />
 
-    <link rel="stylesheet" href="./css/all.css" />
-    <link rel="stylesheet" href="./css/scene.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="./css/style.css" />
 
 
     <script type="application/javascript" src="./js/validate.js"></script>
     <script type="application/javascript" src="./js/justjs.js"></script>
     <script type="text/javascript" src="./js/jquery.min.js"></script>
     <script type="application/javascript" src="./js/sclist.js"></script>
-
-
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.0/dist/alpine.min.js" defer></script>
+    <script src="./js/studentCourseApp.js"></script>
 </head>
 
 <body>
-    <div class="wrapper">
+    <div class="wrapper" x-data="studentCourseData" x-init="loadAllStudents()">
+        <div class="w3-indigo w3-large w3-padding-left">
+            <a class="menu-item" @click="displayStudentPanel()"><i class="fa fa-users"></i>
+                Students</a>
+            <a class="menu-item" @click="displayCoursePanel()"><i class="fa fa-book"></i> Courses</a>
+            <a class="menu-item" @click="displayUploadPanel()"><i class="fa fa-file-upload"></i> Upload
+                Students</a>
+        </div>
+
         <div>
+
+            <div class="view-control w3-animate-left" id="studentPanel" style="display:none" x-show="showStudentPanel">
+                <div class="w3-xlarge w3-center w3-indigo w3-padding-24 w3-margin-bottom">
+                    Student Managment
+                </div>
+
+                <div class="w3-padding" x-show="!showStudentAdd && !showStudentEdit && !showStudentCourse">
+                    <h1 class="w3-text-indigo">
+                        Available Students
+                    </h1>
+
+                    <button class="w3-button w3-border w3-white w3-text-indigo" @click="addStudent()"><i
+                            class="fa fa-user-plus"></i> Add</button>
+                    <button class="w3-button w3-indigo w3-round-large" @click="loadAllStudents()"><i
+                            class="fa fa-sync"></i> Refresh</button>
+                    <table class="w3-table w3-table-all">
+                        <thead>
+                            <tr>
+                                <th>Student Number</th>
+                                <th>First Name</th>
+                                <th>Surname</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="student in students">
+                                <tr>
+                                    <td x-text="student.studentNumber"></td>
+                                    <td x-text="student.firstname"></td>
+                                    <td x-text="student.surname"></td>
+                                    <td>
+                                        <a class="w3-button w3-border w3-white w3-text-indigo" href="#"
+                                            @click="displayStudentCourse(student)">View Courses</a>
+                                        <a class="w3-button w3-border w3-white w3-text-indigo" href="#"
+                                            @click="editStudent(student)">Edit</a>
+                                        <a class="w3-button w3-border w3-white w3-text-red" href="#"
+                                            @click="deleteStudent(student.studentNumber)">
+                                            Delete</a>
+                                    </td>
+                                </tr>
+
+
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+
+
+
+                <div class="w3-padding" x-show="showStudentCourse">
+                    <h1 class="w3-text-indigo">
+                        Student Course - <span x-text="getInputStudent()"></span>
+                    </h1>
+
+
+                    <button class="w3-button w3-indigo w3-round-large" @click="displayStudents()"><i
+                            class="fa fa-arrow-left"></i> Back</button>
+                    <table class="w3-table w3-table-all">
+                        <button class="w3-button w3-indigo w3-round-large" @click="loadStudentCourse()"><i
+                                class="fa fa-sync"></i> Refresh</button>
+                        <table class="w3-table w3-table-all">
+                            <thead>
+                                <tr>
+                                    <th>Course Code</th>
+                                    <th>Course Description</th>
+                                    <th>Grade</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-for="studentCourse in studentCourses">
+                                    <tr>
+                                        <td x-text="studentCourse.courseCode"></td>
+                                        <td x-text="studentCourse.course.courseDescription"></td>
+                                        <td x-text="studentCourse.grade"></td>
+                                        <td>
+                                            <a class="w3-button w3-border w3-white w3-text-indigo" href="#"
+                                                @click="editGrade(student)">Edit Grade</a>
+                                            <a class="w3-button w3-border w3-white w3-text-red" href="#"
+                                                @click="deleteStudentCourse(studentCourse.studentNumber,studentCourse.courseCode)">
+                                                Delete</a>
+                                        </td>
+                                    </tr>
+
+
+                                </template>
+                            </tbody>
+                        </table>
+                </div>
+
+                <div class="w3-padding" x-show="showStudentEdit || showStudentAdd">
+
+                    <div class="w3-padding">
+
+                        <h1 class="w3-text-indigo" x-show="showStudentAdd">
+                            Add new Student
+                        </h1>
+                        <h1 class="w3-text-indigo" x-show="showStudentEdit">
+                            Edit Student
+                        </h1>
+
+                        <div class="w3-padding">
+                            <lable class="w3-text-indigo" for="sudentNumber">Student Number</lable>
+                            <input type="number" class="w3-input w3-border" name="studentNumber"
+                                placeholder="Student Number" x-model="studentInput.studentNumber" />
+                        </div>
+
+                        <div class="w3-row">
+                            <div class="w3-padding w3-half">
+                                <lable class="w3-text-indigo" for="firstname">First Name</lable>
+                                <input class="w3-input w3-border" name="firstname" placeholder="First Name"
+                                    x-model="studentInput.firstname" />
+                            </div>
+
+                            <div class="w3-padding w3-half">
+                                <lable class="w3-text-indigo" for="surname">Surname</lable>
+                                <input class="w3-input w3-border" name="surname" placeholder="Surname"
+                                    x-model="studentInput.surname" />
+                            </div>
+                        </div>
+
+                        <div class="w3-padding">
+                            <button class="w3-button w3-border w3-indigo w3-border w3-border-blue"
+                                @click="hideStudentAddEdit()"><i class="fa fa-arrow-left"></i>
+                                Back</button>
+                            <button class="w3-button w3-indigo" @click="saveStudentAdd()" x-show="showStudentAdd"><i
+                                    class="fa fa-user-plus"></i>
+                                Add</button>
+                            <button class="w3-button w3-indigo" @click="saveStudentEdit()" x-show="showStudentEdit"><i
+                                    class="fa fa-save"></i>
+                                Save</button>
+
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="view-control w3-animate-left" id="coursePanel" style="display:none" x-show="showCoursePanel">
+                <div class="w3-xlarge w3-center w3-indigo w3-padding-24 w3-margin-bottom">
+                    Course Management
+                </div>
+
+                <div class="w3-padding" x-show="!showCourseAdd && !showCourseEdit">
+                    <h1 class="w3-text-indigo">
+                        Available Courses
+                    </h1>
+
+                    <button class="w3-button w3-border w3-white w3-text-indigo" @click="addCourse()"><i
+                            class="fa fa-plus"></i> Add</button>
+                    <button class="w3-button w3-indigo w3-round-large" @click="loadAllCourses()"><i
+                            class="fa fa-sync"></i> Refresh</button>
+                    <table class="w3-table w3-table-all">
+                        <thead>
+                            <tr>
+                                <th>Course Code</th>
+                                <th>Course Description</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="course in courses">
+                                <tr>
+                                    <td x-text="course.courseCode"></td>
+                                    <td x-text="course.courseDescription"></td>
+                                    <td>
+                                        <a class="w3-button w3-border w3-white w3-text-indigo" href="#"
+                                            @click="editCourse(course)">Edit</a>
+                                        <a class="w3-button w3-border w3-white w3-text-red" href="#"
+                                            @click="deleteCourse(course.courseCode)">
+                                            Delete</a>
+                                    </td>
+                                </tr>
+
+
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+
+
+                <div class="w3-padding" x-show="showCourseEdit || showCourseAdd">
+
+                    <div class="w3-padding">
+
+                        <h1 class="w3-text-indigo" x-show="showCourseAdd">
+                            Add new Course
+                        </h1>
+                        <h1 class="w3-text-indigo" x-show="showCourseEdit">
+                            Edit Course
+                        </h1>
+
+                        <div class="w3-padding">
+                            <lable class="w3-text-indigo" for="courseCode">Course Code</lable>
+                            <input class="w3-input w3-border" name="courseCode" placeholder="Course Code"
+                                x-model="courseInput.courseCode" />
+                        </div>
+
+                        <div class="w3-padding">
+                            <lable class="w3-text-indigo" for="courseDescription">Course Description</lable>
+                            <input class="w3-input w3-border" name="courseDescription" placeholder="Course Descrition"
+                                x-model="courseInput.courseDescription" />
+                        </div>
+
+
+
+                        <div class="w3-padding">
+                            <button class="w3-button w3-border w3-indigo w3-border w3-border-blue"
+                                @click="hideCourseAddEdit()"><i class="fa fa-arrow-left"></i>
+                                Back</button>
+                            <button class="w3-button w3-indigo" @click="saveCourseAdd()" x-show="showCourseAdd"><i
+                                    class="fa fa-plus"></i>
+                                Add</button>
+                            <button class="w3-button w3-indigo" @click="saveCourseEdit()" x-show="showCourseEdit"><i
+                                    class="fa fa-save"></i>
+                                Save</button>
+
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="view-control w3-animate-left" class="" id="uploadPanel" style="display:none"
+                x-show="showUploadPanel">
+                <div class="w3-xlarge w3-center w3-indigo w3-padding-24 w3-margin-bottom">
+                    Upload Student
+                </div>
+
+                <div class="w3-padding w3-padding-16">
+                    <h1 class="w3-text-indigo">
+                        Upload Student Files
+                    </h1>
+                    <form id="uploadForm" type="" action="" method="post" enctype="multipart/form-data">
+
+                        <input class="w3-input w3-border w3-border-black w3-margin-bottom" name="files" type="file"
+                            multiple />
+
+                        <button class="w3-button w3-indigo"><i class="fa fa-upload"></i> Upload</button>
+
+                    </form>
+                </div>
+            </div>
 
         </div>
 
     </div>
 
     <script type="application/javascript" src="./js/justcontrol.js"></script>
-
+    <script type="application/javascript" src="./js/upload.js"></script>
 
 </body>
 

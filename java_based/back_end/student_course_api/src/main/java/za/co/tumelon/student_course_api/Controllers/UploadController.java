@@ -1,7 +1,5 @@
 package za.co.tumelon.student_course_api.Controllers;
 
-import java.util.*;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +13,7 @@ import za.co.tumelon.student_course_api.Model.ResponseModel;
 import za.co.tumelon.student_course_api.Utilities.CsvImportUtil;
 
 @RestController
+@CrossOrigin(origins = "http://localhost")
 public class UploadController {
 
     @Autowired
@@ -30,8 +29,6 @@ public class UploadController {
     public ResponseEntity<ResponseModel> uploadFiles(@RequestParam("files") MultipartFile[] files) {
         try {
 
-            List<String> fileNames = new ArrayList<>();
-
             CsvImportUtil csvRead = new CsvImportUtil();
             for (MultipartFile file : files) {
                 csvRead.readInput(file);
@@ -41,10 +38,10 @@ public class UploadController {
             csvRead.clear();
 
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ResponseModel("Files Uploaded" + fileNames));
+                    .body(new ResponseModel("Files Uploaded"));
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseModel("Could not upload files"));
         }
     }
